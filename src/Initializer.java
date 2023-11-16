@@ -62,18 +62,18 @@ public class Initializer {
             String[] parts = actionLine.split(",");
 
             UUID playerId = UUID.fromString(parts[0]);
-            ActionType actionType = ActionType.valueOf(parts[1]);
+            TransactionType transactionType = TransactionType.valueOf(parts[1]);
             UUID matchId = !parts[2].isEmpty() ? UUID.fromString(parts[2]) : null;
             Integer coins = Integer.parseInt(parts[3]);
             Side bettedSide = !parts[4].isEmpty() ? Side.valueOf(parts[4]) : null;
 
             Transaction transaction = new Transaction();
             transaction.setPlayerId(playerId);
-            transaction.setActionType(actionType);
+            transaction.setTransactionType(transactionType);
             transaction.setCoins(coins);
 
             // can be certain then that matchId and bettedSide are not empty
-            if (actionType == ActionType.BET) {
+            if (transactionType == TransactionType.BET) {
                 transaction.setMatchId(matchId);
                 transaction.setBettedSide(bettedSide);
             }

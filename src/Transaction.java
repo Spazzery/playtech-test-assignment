@@ -6,7 +6,7 @@ import java.util.UUID;
 public class Transaction {
 
     private UUID playerId;
-    private ActionType actionType;
+    private TransactionType transactionType;
     private UUID matchId;  // can be null
     private Integer coins;
     private Side bettedSide;  // can be null
