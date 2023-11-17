@@ -13,21 +13,4 @@ public class FileReaderHelper<T> {
         }
         return lines;
     }
-
-//    public static List<T> readAllLinesIntoObjects(String path, Class clazz) {
-//        List<String> lines;
-//        try {
-//            lines = Files.readAllLines(Paths.get(path));
-//        } catch (IOException e) {
-//            throw new RuntimeException("Failed to open file: " + path);
-//        }
-//
-//        if (clazz == Player.class) {
-//
-//        }
-//        else if (clazz == Match.class) {
-//
-//        }
-//        else
-//    }
 }

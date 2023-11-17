@@ -1,3 +1,3 @@
 public enum TransactionType {
-    DRAW, BET, DEPOSIT
+    WITHDRAW, BET, DEPOSIT
 }

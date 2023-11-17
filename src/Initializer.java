@@ -47,7 +47,7 @@ public class Initializer {
     }
     private static boolean containsPlayerId(List<Player> players, UUID playerId) {
         for (Player player : players) {
-            if (player.getPlayerId() == playerId) {
+            if (player.getPlayerId().equals(playerId)) {
                 return true;
             }
         }
@@ -65,14 +65,14 @@ public class Initializer {
             TransactionType transactionType = TransactionType.valueOf(parts[1]);
             UUID matchId = !parts[2].isEmpty() ? UUID.fromString(parts[2]) : null;
             Integer coins = Integer.parseInt(parts[3]);
-            Side bettedSide = !parts[4].isEmpty() ? Side.valueOf(parts[4]) : null;
+            Side bettedSide = parts.length > 4 ? Side.valueOf(parts[4]) : null;
 
             Transaction transaction = new Transaction();
             transaction.setPlayerId(playerId);
             transaction.setTransactionType(transactionType);
             transaction.setCoins(coins);
 
-            // can be certain then that matchId and bettedSide are not empty
+            // if BET can be certain then that matchId and bettedSide are not empty
             if (transactionType == TransactionType.BET) {
                 transaction.setMatchId(matchId);
                 transaction.setBettedSide(bettedSide);
@@ -88,9 +88,8 @@ public class Initializer {
         for (Player player : players) {
 
             List<Transaction> playerTransactions = new ArrayList<>();
-
             for (Transaction transaction : transactions) {
-                if (transaction.getPlayerId() == player.getPlayerId()) {
+                if (transaction.getPlayerId().equals(player.getPlayerId())) {
                     playerTransactions.add(transaction);
                 }
             }
