@@ -41,7 +41,7 @@ public class Main {
         }
 
         // Write the results into results file
-        writeResults("src/result.txt", legitimatePlayers, illegitimatePlayers, casino.getBalance(), matches);
+        writeResults("src/results.txt", legitimatePlayers, illegitimatePlayers, casino.getBalance(), matches);
 
         // Let the user know the program has finished
         System.out.println("Finished the program!");
