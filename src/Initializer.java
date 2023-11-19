@@ -45,6 +45,7 @@ public class Initializer {
         }
         return players;
     }
+
     private static boolean containsPlayerId(List<Player> players, UUID playerId) {
         for (Player player : players) {
             if (player.getPlayerId().equals(playerId)) {
@@ -72,7 +73,7 @@ public class Initializer {
             transaction.setTransactionType(transactionType);
             transaction.setCoins(coins);
 
-            // if BET can be certain then that matchId and bettedSide are not empty
+            // if type is BET, we can be certain then that matchId and bettedSide are not empty
             if (transactionType == TransactionType.BET) {
                 transaction.setMatchId(matchId);
                 transaction.setBettedSide(bettedSide);

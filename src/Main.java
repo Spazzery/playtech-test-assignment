@@ -23,6 +23,7 @@ public class Main {
         // Separate legitimate players and illegitimate players and do calculations
         List<Player> legitimatePlayers = new ArrayList<>();
         List<Player> illegitimatePlayers = new ArrayList<>();
+
         for (Player player : players) {
             if (isLegitimatePlayer(player)) {
                 legitimatePlayers.add(player);
@@ -39,11 +40,10 @@ public class Main {
             }
         }
 
-        System.out.println(casino.getBalance());
-
         // Write the results into results file
         writeResults("src/result.txt", legitimatePlayers, illegitimatePlayers, casino.getBalance(), matches);
 
+        // Let the user know the program has finished
         System.out.println("Finished the program!");
 
     }
@@ -105,12 +105,11 @@ public class Main {
         Result betResult = match.getResult();
         Side bettedSide = transaction.getBettedSide();
 
-        if (betResult == Result.DRAW) {  // If draw, then return nothing. None added to casino balance
+        if (betResult == Result.DRAW) {  // If draw, then return nothing
             return 0;
         }
 
         float returnRate;
-
         if (betResult == Result.A && bettedSide == Side.A) {
             returnRate = match.getReturnRateForA();
         }
@@ -132,32 +131,23 @@ public class Main {
         int playerBalance = 0;
 
         for (Transaction transaction : transactions) {
-            System.out.println("Initial: " + playerBalance);
-            System.out.println(transaction.getCoins());
-
             if (transaction.getTransactionType() == TransactionType.BET) {
+
                 Match match = findMatchById(transaction.getMatchId(), matches);  // cant be null
 
                 int profit = calculateProfit(transaction, match);
-
-                System.out.println("Netchange: " + profit);
 
                 playerBalance += profit;
             }
             else if (transaction.getTransactionType() == TransactionType.DEPOSIT) {
                 playerBalance += transaction.getCoins();
-                System.out.println("Deposit: " + transaction.getCoins());
             }
             else if (transaction.getTransactionType() == TransactionType.WITHDRAW) {
                 playerBalance -= transaction.getCoins();
-                System.out.println("Withdraw: " + transaction.getCoins());
             }
             else {
                 throw new RuntimeException("No methods for transaction: " + transaction.getTransactionType());
             }
-
-            System.out.println(playerBalance);
-            System.out.println("------");
         }
 
         return playerBalance;
@@ -177,7 +167,6 @@ public class Main {
 
             // illegitimatePlayers
             for (Player illegitimatePlayer : illegitimatePlayers) {
-                System.out.println(illegitimatePlayer.getIllegalTransactions());
                 Transaction transaction = illegitimatePlayer.getIllegalTransactions().get(0);
                 writer.write(illegitimatePlayer.getPlayerId()
                         + " " + transaction.getTransactionType()
@@ -192,7 +181,7 @@ public class Main {
             writer.write(String.valueOf(casinoBalance));
 
         } catch (IOException e) {
-            throw new RuntimeException("Issue with writing into the file: " + e);
+            throw new RuntimeException("Issue with writing into file: " + e);
         }
     }
 
