@@ -2,6 +2,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -84,7 +85,14 @@ public class Main {
                 Match match = findMatchById(transaction.getMatchId(), matches);  // cant be null
 
                 int netChange = calculateNetChange(transaction, match);
-                casinoBalance += netChange;
+                int profit = netChange - transaction.getCoins();
+                if (profit > 0) {  // player won
+                    casinoBalance -= (netChange + transaction.getCoins());  // casino loses
+                }
+                else if (profit < 0) {
+                    casinoBalance += (netChange + transaction.getCoins());
+                }
+                // if DRAW, do nothing
             }
         }
 
@@ -109,32 +117,48 @@ public class Main {
 
         float returnRate = (betResult == Result.A) ? match.getReturnRateForA() : match.getReturnRateForB();
 
-        return (int) Math.floor(transaction.getCoins() * returnRate);
+        BigDecimal coinsDecimal = BigDecimal.valueOf(transaction.getCoins())
+                .multiply(BigDecimal.valueOf(returnRate))
+                .setScale(0, RoundingMode.FLOOR);
+
+        return coinsDecimal.intValue();
     }
 
     private static int calculatePlayerBalance(List<Transaction> transactions, List<Match> matches) {
         int playerBalance = 0;
 
         for (Transaction transaction : transactions) {
+            System.out.println("Initial: " + playerBalance);
+            System.out.println(transaction.getCoins());
+
             if (transaction.getTransactionType() == TransactionType.BET) {
                 Match match = findMatchById(transaction.getMatchId(), matches);  // cant be null
 
                 int netChange = calculateNetChange(transaction, match);
 
+                System.out.println("Netchange: " + netChange);
+                System.out.println("Profit: " + (netChange - transaction.getCoins()));
+
                 if (netChange != 0) {  // if == 0, then no need to remove and add the coins bet
                     playerBalance -= transaction.getCoins();  // the bet coins removed first
                 }
+
                 playerBalance += netChange;
             }
             else if (transaction.getTransactionType() == TransactionType.DEPOSIT) {
                 playerBalance += transaction.getCoins();
+                System.out.println("Deposit: " + transaction.getCoins());
             }
             else if (transaction.getTransactionType() == TransactionType.WITHDRAW) {
                 playerBalance -= transaction.getCoins();
+                System.out.println("Withdraw: " + transaction.getCoins());
             }
             else {
                 throw new RuntimeException("No methods for transaction: " + transaction.getTransactionType());
             }
+
+            System.out.println(playerBalance);
+            System.out.println("------");
         }
 
         return playerBalance;
