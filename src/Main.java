@@ -84,15 +84,8 @@ public class Main {
             if (transaction.getTransactionType() == TransactionType.BET) {
                 Match match = findMatchById(transaction.getMatchId(), matches);  // cant be null
 
-                int netChange = calculateNetChange(transaction, match);
-                int profit = netChange - transaction.getCoins();
-                if (profit > 0) {  // player won
-                    casinoBalance -= (netChange + transaction.getCoins());  // casino loses
-                }
-                else if (profit < 0) {
-                    casinoBalance += (netChange + transaction.getCoins());
-                }
-                // if DRAW, do nothing
+                int profit = calculateProfit(transaction, match);  // positive number if player one, negative if lost
+                casinoBalance -= profit;  // if player won, then casino lost
             }
         }
 
@@ -108,14 +101,25 @@ public class Main {
         throw new RuntimeException("No existing match with ID: " + matchId.toString());
     }
 
-    private static int calculateNetChange(Transaction transaction, Match match) {
+    private static int calculateProfit(Transaction transaction, Match match) {
         Result betResult = match.getResult();
+        Side bettedSide = transaction.getBettedSide();
 
         if (betResult == Result.DRAW) {  // If draw, then return nothing. None added to casino balance
             return 0;
         }
 
-        float returnRate = (betResult == Result.A) ? match.getReturnRateForA() : match.getReturnRateForB();
+        float returnRate;
+
+        if (betResult == Result.A && bettedSide == Side.A) {
+            returnRate = match.getReturnRateForA();
+        }
+        else if (betResult == Result.B && bettedSide == Side.B) {
+            returnRate = match.getReturnRateForB();
+        }
+        else {  // player lost
+            return -transaction.getCoins();
+        }
 
         BigDecimal coinsDecimal = BigDecimal.valueOf(transaction.getCoins())
                 .multiply(BigDecimal.valueOf(returnRate))
@@ -134,16 +138,11 @@ public class Main {
             if (transaction.getTransactionType() == TransactionType.BET) {
                 Match match = findMatchById(transaction.getMatchId(), matches);  // cant be null
 
-                int netChange = calculateNetChange(transaction, match);
+                int profit = calculateProfit(transaction, match);
 
-                System.out.println("Netchange: " + netChange);
-                System.out.println("Profit: " + (netChange - transaction.getCoins()));
+                System.out.println("Netchange: " + profit);
 
-                if (netChange != 0) {  // if == 0, then no need to remove and add the coins bet
-                    playerBalance -= transaction.getCoins();  // the bet coins removed first
-                }
-
-                playerBalance += netChange;
+                playerBalance += profit;
             }
             else if (transaction.getTransactionType() == TransactionType.DEPOSIT) {
                 playerBalance += transaction.getCoins();
@@ -171,7 +170,7 @@ public class Main {
             for (Player legitimatePlayer : legitimatePlayers) {
                 writer.write(legitimatePlayer.getPlayerId()
                         + " " + legitimatePlayer.getBalance()
-                        + " " + calculateWinRate(legitimatePlayer, matches)
+                        + " " + calculateWinRate(legitimatePlayer, matches).toString().replace('.', ',')
                         + "\n");
             }
             writer.write("\n");
@@ -220,7 +219,8 @@ public class Main {
             return BigDecimal.ZERO;
         }
 
-        BigDecimal winRate = new BigDecimal(wonGames).divide(new BigDecimal(placedBets), 2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal winRate = new BigDecimal(wonGames).divide(
+                new BigDecimal(placedBets), 2, BigDecimal.ROUND_HALF_UP);
 
         return winRate;
     }
